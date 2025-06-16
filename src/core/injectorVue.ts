@@ -41,6 +41,21 @@ class TagInjector {
         }
       }
 
+      // 提取标签内容（适用于 Element 类型节点）
+      if (attributes?.tagContent && node.children && Array.isArray(node.children)) {
+        const tagContent = attributes?.tagContent as string;
+        const content = this.extractVueTextContent(node.children);
+        if (content && !additionJSON[tagContent]) {
+          additionJSON[tagContent] = content;
+        }
+      }
+
+      const uniqueIdAttr = attributes?.uniqueId as string;
+      if (uniqueIdAttr && !additionJSON[uniqueIdAttr]) {
+        const uniqueId = `${relativePath}:${loc.start.line}:${loc.start.column}`;
+        additionJSON[uniqueIdAttr] = uniqueId;
+      }
+
       // 添加文件位置信息
       const filePathAttr = attributes?.filePath as string;
       if (filePathAttr && !additionJSON[filePathAttr]) {
@@ -49,13 +64,6 @@ class TagInjector {
 
       // 添加位置信息
       if (loc) {
-        
-        const uniqueIdAttr = attributes?.uniqueId as string;
-        if (uniqueIdAttr && !additionJSON[uniqueIdAttr]) {
-          const uniqueId = `${relativePath}:${loc.start.line}:${loc.start.column}:${loc.end.line}:${loc.end.column}`;
-          additionJSON[uniqueIdAttr] = uniqueId;
-        }
-
         const { line: startLine, column: startColumn } = loc.start;
         const { line: endLine, column: endColumn } = loc.end;
         const startLocationNumberAttr = attributes?.startLocationNumber as string;
@@ -92,6 +100,22 @@ class TagInjector {
       console.error('error', error);
       return '';
     }
+  }
+
+  // 提取 Vue AST 节点中的文本内容
+  extractVueTextContent(children: any[]): string {
+    const textParts = children.map((child) => {
+      if (child.type === 2) {
+        // type 2 表示纯文本
+        return child.content.trim();
+      } else if (child.type === 5 && child.content?.type === 4) {
+        // 插值表达式 {{ msg }}
+        return `{{${child.content.content}}}`;
+      }
+      return '';
+    });
+
+    return textParts.filter(Boolean).join(' ').trim();
   }
 }
 

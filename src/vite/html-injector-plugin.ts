@@ -64,8 +64,8 @@ function createHTMLInjectorPlugin() {
 
       // 获取元素信息
       const tagName = element.tagName.toLowerCase();
-      const id = element.id || '';
-      const className = element.className || '';
+      const id = element.id || '无';
+      const className = element.className || '无';
       const childCount = element.children.length;
 
       // 创建信息对象
@@ -79,7 +79,6 @@ function createHTMLInjectorPlugin() {
       elementInfo[DEFAULT_ATTRIBUTES['startLocationNumber']] = encodeURIComponent(`${startLine}:${startColumn}`);
       elementInfo[DEFAULT_ATTRIBUTES['endLocationNumber']] = encodeURIComponent(`${endLine}:${endColumn}`);
       elementInfo[DEFAULT_ATTRIBUTES['tagName']] = encodeURIComponent(tagName);
-      elementInfo[DEFAULT_ATTRIBUTES['tagContent']] = encodeURIComponent(element.textContent?.trim() || '');
 
       // 将信息存储在自定义属性中
       for (const key in elementInfo) {

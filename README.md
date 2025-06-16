@@ -50,5 +50,5 @@ export default defineConfig({
 
 ## Configure
 
-Read the [Contributing guide](https://github.com/kiwitap001/yunji-tagger/blob/dev/CONTRIBUTING.md)
+Read the [Contributing guide](./CONTRIBUTING.md)
 

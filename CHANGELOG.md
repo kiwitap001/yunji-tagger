@@ -1,5 +1,8 @@
 # Change Log
 
+## 0.0.5 / 2025-07-01
+- Add: react中map属性重复检测
+
 ## 0.0.4 / 2025-07-01
 - Add: react中map的组件或子组件添加 `data-plugin-component-child-map="map"` 属性
 

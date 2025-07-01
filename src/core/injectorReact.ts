@@ -124,8 +124,7 @@ class TagInjector {
     }
 
     // 添加来自 .map 的标记属性
-    if (state?.path) {
-      const pathRR = this.isJSXFromMap(state?.path);
+    if (state?.path && this.isJSXFromMap(state?.path) && !existingAttrNames.has('data-plugin-component-child-map')) {
       newAttributes.push(this.createJSXAttribute('data-plugin-component-child-map', 'map'));
     }
 

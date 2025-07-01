@@ -1,5 +1,8 @@
 # Change Log
 
+## 0.0.4 / 2025-07-01
+- Add: react中map的组件或子组件添加 `data-plugin-component-child-map="map"` 属性
+
 ## 0.0.3 / 2025-06-30
 - Fix: react 插件中元素标签正确的结束位置
 

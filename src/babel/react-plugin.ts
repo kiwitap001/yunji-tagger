@@ -20,7 +20,7 @@ const ReactBabelPlugin = (babel: { types: typeof t }) => {
   const { types: t } = babel;
 
   return {
-    name: "babel-react-yunji-tagger",
+    name: 'babel-react-yunji-tagger',
     visitor: {
       JSXAttribute(path: NodePath<JSXAttribute>) {
         // console.log(`${new Date().toISOString()} path = `, JSON.stringify(path.node));
@@ -28,7 +28,7 @@ const ReactBabelPlugin = (babel: { types: typeof t }) => {
         if (!path.node?.name) return;
 
         let attributeName;
-        
+
         // 获取属性名（兼容 JSXIdentifier 和 JSXNamespacedName）
         if (path.node.name.type === 'JSXIdentifier') {
           attributeName = path.node.name.name;
@@ -44,9 +44,7 @@ const ReactBabelPlugin = (babel: { types: typeof t }) => {
         if (attributeName.includes(':')) {
           const camelCaseName = attributeName
             .split(':')
-            .map((part: any, i: any) => 
-              i > 0 ? part.charAt(0).toUpperCase() + part.slice(1) : part
-            )
+            .map((part: any, i: any) => (i > 0 ? part.charAt(0).toUpperCase() + part.slice(1) : part))
             .join('');
 
           // 修改节点属性名
@@ -60,18 +58,24 @@ const ReactBabelPlugin = (babel: { types: typeof t }) => {
       JSXElement(path: NodePath<JSXElement>, state: any) {
         const { injector } = state.opts;
         if (!injector) return;
-        
+
         // 保存整个 JSXElement 节点到路径的状态中
-        injector.processReactNode(path.node, state);
+        injector.processReactNode(path.node, {
+          ...state,
+          path, // 👈 把当前 path 传进去
+        });
       },
       JSXOpeningElement(path: NodePath<JSXOpeningElement>, state: any) {
         const { injector } = state.opts;
         if (!injector) return;
-        
-        injector.processReactNode(path.node, state);
-      }
-    }
+
+        injector.processReactNode(path.node, {
+          ...state,
+          path, // 👈 把当前 path 传进去
+        });
+      },
+    },
   };
-}
+};
 
 export default ReactBabelPlugin;

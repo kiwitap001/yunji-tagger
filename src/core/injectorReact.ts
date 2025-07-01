@@ -26,6 +26,7 @@ class TagInjector {
 
   // 处理React JSX节点
   processReactNode(node: any, state: any) {
+
     const isJSXElement = node.type === 'JSXElement';
     const openingEl = isJSXElement ? node.openingElement : node;
     const loc = openingEl.loc;
@@ -122,6 +123,12 @@ class TagInjector {
       }
     }
 
+    // 添加来自 .map 的标记属性
+    if (state?.path) {
+      const pathRR = this.isJSXFromMap(state?.path);
+      newAttributes.push(this.createJSXAttribute('data-plugin-component-child-map', 'map'));
+    }
+
     // 自定义属性
     if (attributes?.custom) {
       Object.entries(attributes?.custom).forEach(([name, value]) => {
@@ -143,7 +150,7 @@ class TagInjector {
   }
 
   // 提取上下文信息的辅助方法
-  extractContextInfo(node: any, state: any) {
+  extractContextInfo(node: any) {
     const context: Record<string, string | number> = {};
 
     const attributes = node.attributes.reduce((acc: any, attr: any) => {
@@ -213,6 +220,20 @@ class TagInjector {
   // 创建JSX属性
   createJSXAttribute(name: any, value: any) {
     return types.jsxAttribute(types.jsxIdentifier(name), types.stringLiteral(value));
+  }
+
+  isJSXFromMap(path: any): boolean {
+    let parentPath = path.parentPath;
+    while (parentPath) {
+      if (
+        parentPath.isCallExpression() &&
+        parentPath.node?.callee?.property?.name === 'map'
+      ) {
+        return true;
+      }
+      parentPath = parentPath.parentPath;
+    }
+    return false;
   }
 }
 

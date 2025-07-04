@@ -1,5 +1,8 @@
 # Change Log
 
+## 0.0.6 / 2025-07-04
+- Add: react中添加子元素children检测 生成`data-plugin-has-element-children` 属性
+
 ## 0.0.5 / 2025-07-01
 - Add: react中map属性重复检测
 

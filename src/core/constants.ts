@@ -23,7 +23,9 @@ const DEFAULT_ATTRIBUTES: DefaultAttributes = {
   endLocationNumber: 'data-plugin-end-line-column',
   tagName: 'data-plugin-tag-name',
   tagContent: 'data-plugin-tag-content',
+  elementMap: 'data-plugin-element-map',
   contextInfo: 'data-plugin-component-context',
+  hasElementChildren: 'data-plugin-has-element-children',
 };
 
 /**

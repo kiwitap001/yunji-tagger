@@ -10,9 +10,9 @@ export function checkPeerDeps(packages: string[], pluginName = 'your-plugin') {
   for (const pkg of packages) {
     try {
       const resolvedPath = projectRequire.resolve(pkg);
-      console.log(`[${pluginName}] Found "${pkg}" at:`, resolvedPath);
+      // console.log(`[${pluginName}] Found "${pkg}" at:`, resolvedPath);
     } catch {
-      console.warn(`[${pluginName}] Missing "${pkg}"`);
+      // console.warn(`[${pluginName}] Missing "${pkg}"`);
       missing.push(pkg);
     }
   }

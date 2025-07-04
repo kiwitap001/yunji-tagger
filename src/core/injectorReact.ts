@@ -26,14 +26,13 @@ class TagInjector {
 
   // 处理React JSX节点
   processReactNode(node: any, state: any) {
-
     const isJSXElement = node.type === 'JSXElement';
     const openingEl = isJSXElement ? node.openingElement : node;
     const loc = openingEl.loc;
 
     const { filename, root } = state.file.opts;
     const tagName = openingEl.name?.name || '';
-    const { includeTags, excludeTags, attributes } = this.options;
+    const { includeTags, excludeTags, attributes }: any = this.options;
 
     // 跳过不处理的标签
     if (excludeTags?.includes(tagName)) return;
@@ -55,8 +54,8 @@ class TagInjector {
     // 如果含有 key，则自动添加 data-plugin-component-map
     for (const attr of openingEl.attributes) {
       if (attr.type === 'JSXAttribute' && attr.name?.name === 'key') {
-        if (!existingAttrNames.has('data-plugin-component-map')) {
-          newAttributes.push(this.createJSXAttribute('data-plugin-component-map', 'map'));
+        if (!existingAttrNames.has(attributes.elementMap)) {
+          newAttributes.push(this.createJSXAttribute(attributes.elementMap, 'map'));
         }
         break;
       }
@@ -124,8 +123,17 @@ class TagInjector {
     }
 
     // 添加来自 .map 的标记属性
-    if (state?.path && this.isJSXFromMap(state?.path) && !existingAttrNames.has('data-plugin-component-child-map')) {
-      newAttributes.push(this.createJSXAttribute('data-plugin-component-child-map', 'map'));
+    if (state?.path && this.isJSXFromMap(state?.path) && !existingAttrNames.has(attributes.elementMap)) {
+      newAttributes.push(this.createJSXAttribute(attributes.elementMap, 'map'));
+    }
+
+    // 检查 JSXElement 是否有元素子节点
+    if (isJSXElement && attributes?.hasElementChildren && !existingAttrNames.has(attributes?.hasElementChildren)) {
+      const hasElementChildren = node.children?.some(
+        (child: any) => child.type === 'JSXElement' || child.type === 'JSXFragment'
+      );
+
+      newAttributes.push(this.createJSXAttribute(attributes.hasElementChildren, String(hasElementChildren)));
     }
 
     // 自定义属性
@@ -224,10 +232,7 @@ class TagInjector {
   isJSXFromMap(path: any): boolean {
     let parentPath = path.parentPath;
     while (parentPath) {
-      if (
-        parentPath.isCallExpression() &&
-        parentPath.node?.callee?.property?.name === 'map'
-      ) {
+      if (parentPath.isCallExpression() && parentPath.node?.callee?.property?.name === 'map') {
         return true;
       }
       parentPath = parentPath.parentPath;

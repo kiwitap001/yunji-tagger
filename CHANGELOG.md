@@ -1,5 +1,8 @@
 # Change Log
 
+## 0.0.7 / 2025-07-04
+- Fix: 修复 react中 `data-plugin-has-element-children` 属性重复的问题
+
 ## 0.0.6 / 2025-07-04
 - Add: react中添加子元素children检测 生成`data-plugin-has-element-children` 属性
 

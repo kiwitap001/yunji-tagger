@@ -39,25 +39,23 @@ class TagInjector {
     if (includeTags && includeTags?.length > 0 && !includeTags?.includes(tagName)) return;
 
     const newAttributes: JSXAttribute[] = [];
+    const newAttrNames = new Set<string>();
     const existingAttrNames = new Set(
       openingEl.attributes.filter((attr: any) => attr.type === 'JSXAttribute').map((attr: any) => attr.name?.name)
     );
 
+    // 工具函数：安全添加属性
+    const safeAddAttr = (name: string, value: string) => {
+      if (!name || existingAttrNames.has(name) || newAttrNames.has(name)) return;
+      newAttributes.push(this.createJSXAttribute(name, value));
+      newAttrNames.add(name);
+    };
+
     // 提取标签文本内容，仅在 JSXElement 中执行
-    if (attributes?.tagContent && isJSXElement && !existingAttrNames.has(attributes?.tagContent)) {
+    if (attributes?.tagContent && isJSXElement) {
       const content = this.extractTextContent(node);
       if (content) {
-        newAttributes.push(this.createJSXAttribute(attributes.tagContent, encodeURIComponent(content)));
-      }
-    }
-
-    // 如果含有 key，则自动添加 data-plugin-component-map
-    for (const attr of openingEl.attributes) {
-      if (attr.type === 'JSXAttribute' && attr.name?.name === 'key') {
-        if (!existingAttrNames.has(attributes.elementMap)) {
-          newAttributes.push(this.createJSXAttribute(attributes.elementMap, 'map'));
-        }
-        break;
+        safeAddAttr(attributes.tagContent, encodeURIComponent(content));
       }
     }
 
@@ -65,19 +63,12 @@ class TagInjector {
     const relativePath = path.relative(root, filename);
     const fileName = path.basename(filename);
 
-    // 添加 filePath
-    if (attributes?.filePath && !existingAttrNames.has(attributes?.filePath)) {
-      newAttributes.push(this.createJSXAttribute(attributes?.filePath, encodeURIComponent(relativePath || 'unknown')));
-    }
-
-    // 添加文件名
-    if (attributes?.fileName && !existingAttrNames.has(attributes?.fileName)) {
-      newAttributes.push(this.createJSXAttribute(attributes?.fileName, encodeURIComponent(fileName)));
-    }
+    safeAddAttr(attributes?.filePath, encodeURIComponent(relativePath || 'unknown'));
+    safeAddAttr(attributes?.fileName, encodeURIComponent(fileName));
 
     // 添加位置信息属性（必须使用 openingElement.loc）
     if (loc) {
-      const { line: stratLine, column: startColumn } = loc.start;
+      const { line: startLine, column: startColumn } = loc.start;
       let endLine = loc.end.line;
       let endColumn = loc.end.column;
 
@@ -87,61 +78,52 @@ class TagInjector {
       }
 
       // 添加唯一标识符
-      if (attributes?.uniqueId && !existingAttrNames.has(attributes?.uniqueId)) {
-        const uniqueId = `${relativePath}:${stratLine}:${startColumn}:${endLine}:${endColumn}`;
-        newAttributes.push(this.createJSXAttribute(attributes?.uniqueId, encodeURIComponent(uniqueId)));
+      if (attributes?.uniqueId) {
+        const uniqueId = `${relativePath}:${startLine}:${startColumn}:${endLine}:${endColumn}`;
+        safeAddAttr(attributes?.uniqueId, encodeURIComponent(uniqueId));
       }
-
       // 添加开始位置
-      if (attributes?.startLocationNumber && !existingAttrNames.has(attributes?.startLocationNumber)) {
-        newAttributes.push(
-          this.createJSXAttribute(attributes?.startLocationNumber, encodeURIComponent(`${stratLine}:${startColumn}`))
-        );
-      }
-
+      safeAddAttr(attributes?.startLocationNumber, encodeURIComponent(`${startLine}:${startColumn}`));
       // 添加结束位置
-      if (attributes?.endLocationNumber && !existingAttrNames.has(attributes?.endLocationNumber)) {
-        newAttributes.push(
-          this.createJSXAttribute(attributes?.endLocationNumber, encodeURIComponent(`${endLine}:${endColumn}`))
-        );
-      }
+      safeAddAttr(attributes?.endLocationNumber, encodeURIComponent(`${endLine}:${endColumn}`));
     }
 
     // 添加标签名
-    if (attributes?.tagName && tagName && !existingAttrNames.has(attributes?.tagName)) {
-      newAttributes.push(this.createJSXAttribute(attributes?.tagName, tagName));
-    }
+    safeAddAttr(attributes?.tagName, tagName);
 
     // 添加上下文信息
-    if (attributes?.contextInfo && !existingAttrNames.has(attributes?.contextInfo)) {
+    if (attributes?.contextInfo) {
       const context = this.extractContextInfo(openingEl, state);
       if (context) {
-        newAttributes.push(
-          this.createJSXAttribute(attributes?.contextInfo, encodeURIComponent(JSON.stringify({ ...context })))
-        );
+        safeAddAttr(attributes.contextInfo, encodeURIComponent(JSON.stringify(context)));
       }
     }
 
+    // 如果含有 key，则自动添加 data-plugin-component-map
+    for (const attr of openingEl.attributes) {
+      if (attr.type === 'JSXAttribute' && attr.name?.name === 'key') {
+        safeAddAttr(attributes.elementMap, 'map');
+        break;
+      }
+    }
     // 添加来自 .map 的标记属性
-    if (state?.path && this.isJSXFromMap(state?.path) && !existingAttrNames.has(attributes.elementMap)) {
-      newAttributes.push(this.createJSXAttribute(attributes.elementMap, 'map'));
+    // 来自 .map 判断
+    if (state?.path && this.isJSXFromMap(state.path)) {
+      safeAddAttr(attributes.elementMap, 'map');
     }
 
     // 检查 JSXElement 是否有元素子节点
-    if (isJSXElement && attributes?.hasElementChildren && !existingAttrNames.has(attributes?.hasElementChildren)) {
+    if (isJSXElement && attributes?.hasElementChildren) {
       const hasElementChildren = node.children?.some(
         (child: any) => child.type === 'JSXElement' || child.type === 'JSXFragment'
       );
-
-      newAttributes.push(this.createJSXAttribute(attributes.hasElementChildren, String(hasElementChildren)));
+      safeAddAttr(attributes.hasElementChildren, String(hasElementChildren));
     }
 
     // 自定义属性
     if (attributes?.custom) {
-      Object.entries(attributes?.custom).forEach(([name, value]) => {
-        if (!existingAttrNames.has(name)) {
-          newAttributes.push(this.createJSXAttribute(name, encodeURIComponent(value)));
-        }
+      Object.entries(attributes.custom).forEach(([name, value]) => {
+        safeAddAttr(name, encodeURIComponent(value));
       });
     }
 

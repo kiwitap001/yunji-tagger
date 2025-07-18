@@ -10,7 +10,6 @@ import { type DefaultPluginOptionsType } from '../core/constants.js';
 const VueElementType = 1;
 
 const createVueInjectorPlugin = (options: DefaultPluginOptionsType = {}) => {
-  console.log('createVueInjectorPlugin started');
   // 检查必需的 peerDependencies 是否存在
   checkPeerDeps(['@rollup/pluginutils', '@vue/compiler-dom', '@rollup/pluginutils', 'magic-string'], 'yunji-tagger');
 
@@ -54,8 +53,10 @@ const createVueInjectorPlugin = (options: DefaultPluginOptionsType = {}) => {
                 const insertPosition = node.loc.start.offset + node.tag.length + 1;
                 const addition: string = injector.processVueNode(node, {
                   filename: id,
+                  parentHasVFor: false, // 顶层默认无 v-for
                 });
                 s.prependLeft(insertPosition, addition);
+                // injector.injectChildren(node, id, false, s);
               }
             }) as NodeTransform,
           ],

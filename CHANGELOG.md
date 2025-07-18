@@ -1,5 +1,9 @@
 # Change Log
 
+## 0.0.8 / 2025-07-18
+- Add: react 添加 `'data-plugin-language'='react'` 属性
+- Add: Vue 添加 `'data-plugin-language'='vue'`, `data-plugin-has-element-children` 属性
+
 ## 0.0.7 / 2025-07-04
 - Fix: 修复 react中 `data-plugin-has-element-children` 属性重复的问题
 

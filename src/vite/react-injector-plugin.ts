@@ -8,7 +8,6 @@ import ReactBabelPlugin from '../babel/react-plugin.js';
 import { type DefaultPluginOptionsType } from '../core/constants.js';
 
 const createReactInjectorPlugin = (options: DefaultPluginOptionsType = {}) => {
-  console.log('createReactInjectorPlugin started');
   // 检查必需的 peerDependencies 是否存在
   checkPeerDeps(['@babel/preset-typescript', '@babel/preset-react', '@babel/core'], 'yunji-tagger');
 

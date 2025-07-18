@@ -38,7 +38,7 @@ class TagInjector {
     if (excludeTags?.includes(tagName)) return;
     if (includeTags && includeTags?.length > 0 && !includeTags?.includes(tagName)) return;
 
-    const newAttributes: JSXAttribute[] = [];
+    const newAttributes: JSXAttribute[] = [this.createJSXAttribute('data-plugin-language', 'react')];
     const newAttrNames = new Set<string>();
     const existingAttrNames = new Set(
       openingEl.attributes.filter((attr: any) => attr.type === 'JSXAttribute').map((attr: any) => attr.name?.name)

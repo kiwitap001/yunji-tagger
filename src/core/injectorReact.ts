@@ -26,6 +26,12 @@ class TagInjector {
 
   // 处理React JSX节点
   processReactNode(node: any, state: any) {
+    if ((node as any).__tag_injected__) return;
+    Object.defineProperty(node, '__tag_injected__', {
+      value: true,
+      enumerable: false,
+    });
+
     const isJSXElement = node.type === 'JSXElement';
     const openingEl = isJSXElement ? node.openingElement : node;
     const loc = openingEl.loc;
@@ -38,18 +44,51 @@ class TagInjector {
     if (excludeTags?.includes(tagName)) return;
     if (includeTags && includeTags?.length > 0 && !includeTags?.includes(tagName)) return;
 
-    const newAttributes: JSXAttribute[] = [this.createJSXAttribute('data-plugin-language', 'react')];
+    // const newAttributes: JSXAttribute[] = [this.createJSXAttribute('data-plugin-language', 'react')];
+    const newAttributes: JSXAttribute[] = [];
     const newAttrNames = new Set<string>();
     const existingAttrNames = new Set(
       openingEl.attributes.filter((attr: any) => attr.type === 'JSXAttribute').map((attr: any) => attr.name?.name)
     );
 
     // 工具函数：安全添加属性
+    // const safeAddAttr = (name: string, value: string) => {
+    //   if (!name || existingAttrNames.has(name) || newAttrNames.has(name)) return;
+    //   newAttributes.push(this.createJSXAttribute(name, value));
+    //   newAttrNames.add(name);
+    // };
+
     const safeAddAttr = (name: string, value: string) => {
-      if (!name || existingAttrNames.has(name) || newAttrNames.has(name)) return;
+      if (!name || newAttrNames.has(name)) return;
+
+      // 判断 JSX 中已有此属性名
+      const alreadyExists = openingEl.attributes.some((attr: any) => {
+        // 显式属性
+        if (attr.type === 'JSXAttribute' && attr.name?.name === name) {
+          return true;
+        }
+
+        // Spread 属性：尝试静态分析 {...{ 'data-plugin-language': 'react' }}
+        if (attr.type === 'JSXSpreadAttribute' && attr.argument?.type === 'ObjectExpression') {
+          return attr.argument.properties.some((prop: any) => {
+            if (prop.type !== 'ObjectProperty') return false;
+            const key = prop.key;
+            return (
+              (key.type === 'Identifier' && key.name === name) || (key.type === 'StringLiteral' && key.value === name)
+            );
+          });
+        }
+
+        return false;
+      });
+
+      if (alreadyExists) return;
+
       newAttributes.push(this.createJSXAttribute(name, value));
       newAttrNames.add(name);
     };
+
+    safeAddAttr('data-plugin-language', 'react');
 
     // 提取标签文本内容，仅在 JSXElement 中执行
     if (attributes?.tagContent && isJSXElement) {

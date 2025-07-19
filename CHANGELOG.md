@@ -1,5 +1,8 @@
 # Change Log
 
+## 0.0.9 / 2025-07-18
+- Fix: 修复 `'data-plugin-language'='react'` 属性在项目多次添加的问题
+
 ## 0.0.8 / 2025-07-18
 - Add: react 添加 `'data-plugin-language'='react'` 属性
 - Add: Vue 添加 `'data-plugin-language'='vue'`, `data-plugin-has-element-children` 属性

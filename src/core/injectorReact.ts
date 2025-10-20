@@ -132,7 +132,7 @@ class TagInjector {
 
     // 添加上下文信息
     if (attributes?.contextInfo) {
-      const context = this.extractContextInfo(openingEl, state);
+      const context = this.extractContextInfo(openingEl);
       if (context) {
         safeAddAttr(attributes.contextInfo, encodeURIComponent(JSON.stringify(context)));
       }
@@ -161,7 +161,7 @@ class TagInjector {
 
     // 自定义属性
     if (attributes?.custom) {
-      Object.entries(attributes.custom).forEach(([name, value]) => {
+      Object.entries(attributes.custom).forEach(([name, value]: any) => {
         safeAddAttr(name, encodeURIComponent(value));
       });
     }

@@ -11,7 +11,7 @@ const VueElementType = 1;
 
 const createVueInjectorPlugin = (options: DefaultPluginOptionsType = {}) => {
   // 检查必需的 peerDependencies 是否存在
-  checkPeerDeps(['@rollup/pluginutils', '@vue/compiler-dom', '@rollup/pluginutils', 'magic-string'], 'yunji-tagger');
+  checkPeerDeps(['@rollup/pluginutils', '@vue/compiler-dom', 'magic-string'], 'yunji-tagger');
 
   const filter = createFilter(options.include || /\.vue$/, options.exclude || /node_modules/);
 

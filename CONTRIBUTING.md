@@ -1,59 +1,55 @@
-# Contributing to yunji-tagger
+# Contributing to yunji-tagger-taro
 
 ## Table of Contents
 
-- [Contributing to yunji-tagger](#contributing-to-yunji-tagger)
+- [Contributing to yunji-tagger-taro](#contributing-to-yunji-tagger-taro)
   - [Table of Contents](#table-of-contents)
   - [Documentation](#documentation)
-    - [Installation](#installation)
-    - [Usage](#usage)
-      - [Vite + React](#vite--react)
-      - [Vite + Vue](#vite--vue)
+  - [Installation](#installation)
+  - [Usage](#usage)
+    - [Taro + React](#taro--react)
+  - [Configure](#configure)
       - [Options](#options)
 
 
 
 ## Documentation
 
-### Installation
+## Installation
 
 ```bash
-npm install --save-dev yunji-tagger
+npm install --save-dev yunji-tagger-taro
 ```
 
 ```bash
-yarn add  -dev yunji-tagger
+yarn add  -dev yunji-tagger-taro
 ```
 
-### Usage
 
-#### Vite + React
+## Usage
+
+### Taro + React
 
 ```ts
-import { defineConfig } from 'vite'
-import { ReactInjectorVitePlugin } from 'yunji-tagger'
 
-// https://vitejs.dev/config/
-export default defineConfig({
-  ...
-  plugins: [ReactInjectorVitePlugin()],
-  ...
-})
+const { createBabelPluginTaro } = require('yunji-tagger');
+
+module.exports = {
+  presets: [
+    ['taro', {
+      framework: 'react',
+      ts: true,
+      compiler: 'webpack5',
+      useBuiltIns: process.env.TARO_ENV === 'h5' ? 'usage' : false
+    }]
+  ],
+  "plugins": [createBabelPluginTaro({})], // success
+}
 ```
 
-#### Vite + Vue
+## Configure
 
-```ts
-import { defineConfig } from 'vite'
-import { VueInjectorVitePlugin } from 'yunji-tagger'
-
-// https://vitejs.dev/config/
-export default defineConfig({
-  ...
-  plugins: [VueInjectorVitePlugin(),],
-  ...
-})
-```
+Read the [Contributing guide](https://github.com/kiwitap001/yunji-tagger/blob/yunji-tagger-taro/CONTRIBUTING.md)
 
 ####  Options
 

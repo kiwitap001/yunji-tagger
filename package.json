@@ -1,7 +1,7 @@
 {
-  "name": "yunji-tagger",
-  "version": "0.0.9",
-  "description": "The plugin for tagging components",
+  "name": "yunji-tagger-taro",
+  "version": "0.0.1",
+  "description": "The plugin for tagging components in Taro",
   "type": "module",
   "author": "",
   "license": "MIT",
@@ -21,9 +21,9 @@
   "keywords": [
     "plugin",
     "tagger",
-    "vite",
-    "vite-plugin",
-    "webpack-plugin"
+    "webpack-plugin",
+    "taro",
+    "webpack"
   ],
   "files": [
     "dist"

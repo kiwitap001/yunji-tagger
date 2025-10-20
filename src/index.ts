@@ -6,7 +6,8 @@ import ReactInjectorVitePlugin from './vite/react-injector-plugin.js';
 import createHTMLInjectorPlugin from './vite/html-injector-plugin.js'
 
 // TODO webpack
-// import ReactInjectorWebpackPlugin from './webpack/react-plugin.js';
+import ReactInjectorWebpackPlugin from './webpack/react-plugin.js';
+import { createBabelPluginTaro, TagInjector, ReactInjectorBabelPlugin } from './webpack/react-plugin-taro.js';
 // import VueInjectorWebpackPlugin from './webpack/vue-plugin.js';
 
 export {
@@ -20,7 +21,11 @@ export {
 
   // TODO webpack
   // VueWebpackPlugin,
-  // ReactWebpackPlugin,
+  ReactInjectorWebpackPlugin,
+  // Taro插件
+  createBabelPluginTaro,
+  TagInjector,
+  ReactInjectorBabelPlugin,
   
   // 默认配置
   DEFAULT_ATTRIBUTES

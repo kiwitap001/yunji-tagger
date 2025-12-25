@@ -9,7 +9,7 @@ import type {
   StringLiteral,
   ConditionalExpression,
 } from '@babel/types';
-import { DEFAULT_PLUGIN_OPTIONS, type DefaultPluginOptionsType } from './constants.js';
+import { DEFAULT_PLUGIN_OPTIONS, type DefaultPluginOptionsType, SVG_COMPONENT_MODULES } from './constants.js';
 
 class TagInjector {
   options: DefaultPluginOptionsType = {};
@@ -89,6 +89,13 @@ class TagInjector {
     };
 
     safeAddAttr('data-plugin-language', 'react');
+
+    const isSvgTag = this.isSVGElement(openingEl);
+    const insideSvg = state?.path ? this.isInsideSVG(state.path) : false;
+    const isSvgComponent = state?.path ? this.isSVGComponent(openingEl, state.path) : false;
+    if (isSvgTag || insideSvg || isSvgComponent) {
+      safeAddAttr('data-plugin-is-svg', 'true');
+    }
 
     // 提取标签文本内容，仅在 JSXElement 中执行
     if (attributes?.tagContent && isJSXElement) {
@@ -248,6 +255,73 @@ class TagInjector {
   // 创建JSX属性
   createJSXAttribute(name: any, value: any) {
     return types.jsxAttribute(types.jsxIdentifier(name), types.stringLiteral(value));
+  }
+
+  isSVGElement(openingEl: any): boolean {
+    const nameNode: any = openingEl?.name;
+    if (!nameNode) return false;
+    if (nameNode.type === 'JSXIdentifier') {
+      const n = nameNode.name;
+      return (
+        n === 'svg' ||
+        [
+          'g',
+          'path',
+          'circle',
+          'rect',
+          'line',
+          'polyline',
+          'polygon',
+          'text',
+          'defs',
+          'clipPath',
+          'linearGradient',
+          'radialGradient',
+          'stop',
+          'use',
+          'symbol',
+          'marker',
+          'pattern',
+          'mask',
+        ].includes(n)
+      );
+    }
+    return false;
+  }
+
+  isInsideSVG(path: any): boolean {
+    let p = path;
+    while (p) {
+      if (p.isJSXElement && p.isJSXElement()) {
+        const name: any = p.node?.openingElement?.name;
+        if (name && name.type === 'JSXIdentifier' && name.name === 'svg') {
+          return true;
+        }
+      }
+      p = p.parentPath;
+    }
+    return false;
+  }
+
+  isSVGComponent(openingEl: any, path: any): boolean {
+    const nameNode: any = openingEl?.name;
+    if (!nameNode || nameNode.type !== 'JSXIdentifier') return false;
+    const compName = nameNode.name;
+    const binding = path?.scope?.getBinding?.(compName);
+    if (!binding) return false;
+    const bpath: any = binding.path;
+    if (
+      !bpath ||
+      !(bpath.isImportSpecifier?.() || bpath.isImportDefaultSpecifier?.() || bpath.isImportNamespaceSpecifier?.())
+    ) {
+      return false;
+    }
+    const importDecl: any = bpath.parent;
+    const source = importDecl?.source?.value || '';
+    if (typeof source !== 'string') return false;
+    if (SVG_COMPONENT_MODULES.includes(source)) return true;
+    if (source.startsWith('react-icons')) return true;
+    return false;
   }
 
   isJSXFromMap(path: any): boolean {

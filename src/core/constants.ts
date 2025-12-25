@@ -26,6 +26,7 @@ const DEFAULT_ATTRIBUTES: DefaultAttributes = {
   elementMap: 'data-plugin-element-map',
   contextInfo: 'data-plugin-component-context',
   hasElementChildren: 'data-plugin-has-element-children',
+  isSVG: 'data-plugin-is-svg'
 };
 
 /**
@@ -56,8 +57,7 @@ const DEFAULT_EXCLUDE_TAGS: string[] = [
   'object',
   'embed',
   'applet',
-  'Fragment',
-  'svg',
+  'Fragment'
 ];
 
 /**
@@ -111,6 +111,8 @@ const LOG_LEVELS: Record<string, string> = {
   DEBUG: 'debug',
   VERBOSE: 'verbose',
 };
+
+const SVG_COMPONENT_MODULES: string[] = ['lucide-react', '@ant-design/icons'];
 
 export type DefaultPluginOptionsType = {
   enabled?: boolean;
@@ -201,4 +203,5 @@ export {
   DEFAULT_PLUGIN_OPTIONS,
   RESERVED_ATTRIBUTES,
   SOURCE_MAP_OPTIONS,
+  SVG_COMPONENT_MODULES,
 };

@@ -26,7 +26,9 @@ const DEFAULT_ATTRIBUTES: DefaultAttributes = {
   elementMap: 'data-plugin-element-map',
   contextInfo: 'data-plugin-component-context',
   hasElementChildren: 'data-plugin-has-element-children',
-  isSVG: 'data-plugin-is-svg'
+  isSVG: 'data-plugin-is-svg',
+  svgWidth: 'data-plugin-svg-width',
+  svgHeight: 'data-plugin-svg-height',
 };
 
 /**

@@ -95,6 +95,14 @@ class TagInjector {
     const isSvgComponent = state?.path ? this.isSVGComponent(openingEl, state.path) : false;
     if (isSvgTag || insideSvg || isSvgComponent) {
       safeAddAttr('data-plugin-is-svg', 'true');
+      // 尝试获取 SVG 尺寸
+      const dims = this.getSvgDimensions(openingEl, state?.path);
+      if (attributes?.svgWidth && dims?.width != null) {
+        safeAddAttr(attributes.svgWidth, encodeURIComponent(String(dims.width)));
+      }
+      if (attributes?.svgHeight && dims?.height != null) {
+        safeAddAttr(attributes.svgHeight, encodeURIComponent(String(dims.height)));
+      }
     }
 
     // 提取标签文本内容，仅在 JSXElement 中执行
@@ -322,6 +330,65 @@ class TagInjector {
     if (SVG_COMPONENT_MODULES.includes(source)) return true;
     if (source.startsWith('react-icons')) return true;
     return false;
+  }
+
+  getSvgDimensions(openingEl: any, path: any): { width?: string | number; height?: string | number } {
+    const getAttr = (name: string) => openingEl.attributes.find((a: any) => a.type === 'JSXAttribute' && a.name?.name === name);
+    const readVal = (attr: any): any => {
+      if (!attr) return undefined;
+      if (attr.value?.type === 'StringLiteral') return attr.value.value;
+      if (attr.value?.type === 'JSXExpressionContainer') {
+        const e = attr.value.expression;
+        if (e?.type === 'StringLiteral') return e.value;
+        if (e?.type === 'NumericLiteral') return e.value;
+      }
+      return undefined;
+    };
+    const readStyleDims = (attr: any) => {
+      let w: any, h: any, fs: any;
+      if (attr?.value?.type === 'JSXExpressionContainer' && attr.value.expression?.type === 'ObjectExpression') {
+        for (const prop of attr.value.expression.properties || []) {
+          if (prop.type !== 'ObjectProperty') continue;
+          const key = prop.key;
+          const k = key.type === 'Identifier' ? key.name : key.type === 'StringLiteral' ? key.value : undefined;
+          if (!k) continue;
+          const v = prop.value;
+          if (v.type === 'StringLiteral') {
+            if (k === 'width') w = v.value;
+            if (k === 'height') h = v.value;
+            if (k === 'fontSize') fs = v.value;
+          } else if (v.type === 'NumericLiteral') {
+            if (k === 'width') w = v.value;
+            if (k === 'height') h = v.value;
+            if (k === 'fontSize') fs = v.value;
+          }
+        }
+      }
+      if ((w == null || h == null) && fs != null) {
+        if (w == null) w = fs;
+        if (h == null) h = fs;
+      }
+      return { width: w, height: h };
+    };
+
+    let width = readVal(getAttr('width'));
+    let height = readVal(getAttr('height'));
+
+    if (width == null || height == null) {
+      const styleDims = readStyleDims(getAttr('style'));
+      if (width == null) width = styleDims.width;
+      if (height == null) height = styleDims.height;
+    }
+
+    if (width == null || height == null) {
+      const size = readVal(getAttr('size'));
+      if (size != null) {
+        if (width == null) width = size;
+        if (height == null) height = size;
+      }
+    }
+
+    return { width, height };
   }
 
   isJSXFromMap(path: any): boolean {

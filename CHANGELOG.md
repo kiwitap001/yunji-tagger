@@ -1,4 +1,6 @@
 # Change Log
+## 0.0.10 / 2025-12-25
+- Add: 添加默写svg图标库解析 `'data-plugin-is-svg'='true'` 添加svg图标解析
 
 ## 0.0.9 / 2025-07-18
 - Fix: 修复 `'data-plugin-language'='react'` 属性在项目多次添加的问题

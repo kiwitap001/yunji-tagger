@@ -29,6 +29,7 @@ const DEFAULT_ATTRIBUTES: DefaultAttributes = {
   isSVG: 'data-plugin-is-svg',
   svgWidth: 'data-plugin-svg-width',
   svgHeight: 'data-plugin-svg-height',
+  svgContent: 'data-plugin-svg-content',
 };
 
 /**

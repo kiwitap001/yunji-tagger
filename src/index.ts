@@ -10,7 +10,6 @@ import createHTMLInjectorPlugin from './vite/html-injector-plugin.js'
 // import VueInjectorWebpackPlugin from './webpack/vue-plugin.js';
 
 export {
-  
   // * vite
   // Vue插件
   VueInjectorVitePlugin,

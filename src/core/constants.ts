@@ -116,8 +116,10 @@ const LOG_LEVELS: Record<string, string> = {
   VERBOSE: 'verbose',
 };
 
-const SVG_COMPONENT_MODULES: string[] = ['lucide-react', '@ant-design/icons'];
-const CHART_COMPONENT_MODULES: string[] = ['recharts', 'echarts', 'echarts-for-react', 'vue-echarts'];
+const SVG_COMPONENT_MODULES_REACT: string[] = ['lucide-react', '@ant-design/icons'];
+const CHART_COMPONENT_MODULES_REACT: string[] = ['recharts', 'echarts', 'echarts-for-react'];
+const SVG_COMPONENT_MODULES_VUE: string[] = ['lucide-vue-next', 'lucide-vue', '@element-plus/icons-vue', '@ant-design/icons-vue'];
+const CHART_COMPONENT_MODULES_VUE: string[] = ['vue-echarts'];
 
 export type DefaultPluginOptionsType = {
   enabled?: boolean;
@@ -208,6 +210,8 @@ export {
   DEFAULT_PLUGIN_OPTIONS,
   RESERVED_ATTRIBUTES,
   SOURCE_MAP_OPTIONS,
-  SVG_COMPONENT_MODULES,
-  CHART_COMPONENT_MODULES,
+  SVG_COMPONENT_MODULES_REACT,
+  CHART_COMPONENT_MODULES_REACT,
+  SVG_COMPONENT_MODULES_VUE,
+  CHART_COMPONENT_MODULES_VUE
 };

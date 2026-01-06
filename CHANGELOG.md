@@ -1,6 +1,9 @@
 # Change Log
+## 0.0.11 / 2026-01-06
+- Add: 添加对图表组件渲染为svg `'data-plugin-is-chart'='true'`
+
 ## 0.0.10 / 2025-12-25
-- Add: 添加默写svg图标库解析 `'data-plugin-is-svg'='true'` 添加svg图标解析
+- Add: 添加对于svg和组件库图标解析 `'data-plugin-is-svg'='true'`
 
 ## 0.0.9 / 2025-07-18
 - Fix: 修复 `'data-plugin-language'='react'` 属性在项目多次添加的问题

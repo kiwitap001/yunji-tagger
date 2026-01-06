@@ -119,7 +119,7 @@ const LOG_LEVELS: Record<string, string> = {
 const SVG_COMPONENT_MODULES_REACT: string[] = ['lucide-react', '@ant-design/icons'];
 const CHART_COMPONENT_MODULES_REACT: string[] = ['recharts', 'echarts', 'echarts-for-react'];
 const SVG_COMPONENT_MODULES_VUE: string[] = ['lucide-vue-next', 'lucide-vue', '@element-plus/icons-vue', '@ant-design/icons-vue'];
-const CHART_COMPONENT_MODULES_VUE: string[] = ['vue-echarts'];
+const CHART_COMPONENT_MODULES_VUE: string[] = ['echarts', 'vue-echarts'];
 
 export type DefaultPluginOptionsType = {
   enabled?: boolean;

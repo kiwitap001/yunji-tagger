@@ -1,6 +1,11 @@
-import path from 'path';
-import { DEFAULT_PLUGIN_OPTIONS, type DefaultPluginOptionsType } from './constants.js';
-import MagicString from 'magic-string';
+import path from "path";
+import {
+  DEFAULT_PLUGIN_OPTIONS,
+  type DefaultPluginOptionsType,
+  SVG_COMPONENT_MODULES_VUE,
+  CHART_COMPONENT_MODULES_VUE,
+} from "./constants.js";
+import MagicString from "magic-string";
 
 const VueElementType = 1;
 
@@ -18,19 +23,27 @@ class TagInjector {
   }
 
   // 处理Vue AST节点
-  processVueNode(node: any, context: { filename: string; parentHasVFor?: boolean }): string {
+  processVueNode(
+    node: any,
+    context: {
+      filename: string;
+      parentHasVFor?: boolean;
+      tagType?: "SVG" | "CHART";
+    }
+  ): string {
     try {
       const { tag, loc, props: nodeProps } = node;
-      const { filename, parentHasVFor } = context;
+      let { filename, parentHasVFor, tagType } = context;
       const { includeTags, excludeTags, attributes } = this.options;
 
       // 检查是否在排除列表中
-      if (excludeTags?.includes(tag)) return '';
-      if (includeTags && includeTags.length > 0 && !includeTags.includes(tag)) return '';
+      if (excludeTags?.includes(tag)) return "";
+      if (includeTags && includeTags.length > 0 && !includeTags.includes(tag))
+        return "";
 
-      let result = '';
+      let result = "";
       let additionJSON: any = {
-        'data-plugin-language': 'vue',
+        "data-plugin-language": "vue",
       };
 
       // 获取文件路径（相对路径或绝对路径）
@@ -42,11 +55,11 @@ class TagInjector {
       if (nodeProps.length > 0) {
         const elementMapAttr = attributes?.elementMap as string;
         for (let itemProp of nodeProps) {
-          if (itemProp.type === 7 && itemProp.name === 'for') {
+          if (itemProp.type === 7 && itemProp.name === "for") {
             thisNodeHasVFor = true;
             if (!additionJSON[elementMapAttr]) {
-              additionJSON['data-plugin-component-for'] = 'for';
-              additionJSON[elementMapAttr] = 'true';
+              additionJSON["data-plugin-component-for"] = "for";
+              additionJSON[elementMapAttr] = "true";
             }
           }
         }
@@ -55,20 +68,26 @@ class TagInjector {
       // ✅ 如果父级有 v-for，也标记当前节点
       if (parentHasVFor && attributes?.elementMap) {
         const elementMapAttr = attributes?.elementMap as string;
-        additionJSON[elementMapAttr] = 'true';
+        additionJSON[elementMapAttr] = "true";
       }
 
       // 提取标签内容（适用于 Element 类型节点）
-      if (attributes?.tagContent && node.children && Array.isArray(node.children)) {
+      if (
+        attributes?.tagContent &&
+        node.children &&
+        Array.isArray(node.children)
+      ) {
         const tagContent = attributes?.tagContent as string;
         const hasElementChildrenAttr = attributes?.hasElementChildren as string;
         const elementMapAttr = attributes?.elementMap as string;
         if (Array.isArray(node.children)) {
-          const elementChildren = node.children.filter((child) => child.type === VueElementType);
+          const elementChildren = node.children.filter(
+            (child) => child.type === VueElementType
+          );
           if (elementChildren.length > 0) {
-            additionJSON[hasElementChildrenAttr] = 'true';
+            additionJSON[hasElementChildrenAttr] = "true";
           } else {
-            additionJSON[hasElementChildrenAttr] = 'false';
+            additionJSON[hasElementChildrenAttr] = "false";
           }
         }
 
@@ -76,6 +95,43 @@ class TagInjector {
         if (content && !additionJSON[tagContent]) {
           additionJSON[tagContent] = content;
         }
+      }
+
+      // --- 自动导入的兜底识别 ---
+      if (!tagType) {
+        // 逻辑：如果是常见的图标命名规范（如 Lucide 的 Camera, 或 ElIcon...）
+        if (/^[A-Z][a-zA-Z]+/.test(tag) && node.isSelfClosing) {
+          // 这里可以根据 tag 特征二次细分
+          tagType = "SVG";
+        }
+      }
+
+      // SVG Handling
+      const isSVGAttr = attributes?.isSVG as string;
+      const isChartAttr = attributes?.isChart as string;
+      const isSVG = tag === "svg" || tagType === "SVG";
+      const isChart = tagType === "CHART" || tag === "v-chart" || tag === "VChart";
+
+      // SVG 图标组件
+      if (isSVGAttr && isSVG) {
+        additionJSON[isSVGAttr] = "true";
+
+        additionJSON[attributes?.isSVG as string] = "true";
+        const size = this.getVueAttr(nodeProps, 'size');
+        const width = this.getVueAttr(nodeProps, 'width') || size;
+        const height = this.getVueAttr(nodeProps, 'height') || size;
+        if (width) additionJSON[attributes?.svgWidth as string] = width;
+        if (height) additionJSON[attributes?.svgHeight as string] = height;
+
+        // Content
+        const svgContentAttr = attributes?.svgContent as string;
+        if (svgContentAttr && loc?.source) {
+          additionJSON[svgContentAttr] = loc.source;
+        }
+      }
+      // Chart 图表内容
+      if (isChart && isChartAttr) {
+        additionJSON[attributes?.isChart as string] = "true";
       }
 
       const uniqueIdAttr = attributes?.uniqueId as string;
@@ -87,21 +143,24 @@ class TagInjector {
       // 添加文件位置信息
       const filePathAttr = attributes?.filePath as string;
       if (filePathAttr && !additionJSON[filePathAttr]) {
-        additionJSON[filePathAttr] = relativePath || 'unknown';
+        additionJSON[filePathAttr] = relativePath || "unknown";
       }
 
       // 添加位置信息
       if (loc) {
         const { line: startLine, column: startColumn } = loc.start;
         const { line: endLine, column: endColumn } = loc.end;
-        const startLocationNumberAttr = attributes?.startLocationNumber as string;
+        const startLocationNumberAttr =
+          attributes?.startLocationNumber as string;
         if (startLocationNumberAttr && !additionJSON[startLocationNumberAttr]) {
-          additionJSON[startLocationNumberAttr] = `${startLine}:${startColumn}`.toString();
+          additionJSON[startLocationNumberAttr] =
+            `${startLine}:${startColumn}`.toString();
         }
 
         const endLocationNumberAttr = attributes?.endLocationNumber as string;
         if (endLocationNumberAttr && !additionJSON[endLocationNumberAttr]) {
-          additionJSON[endLocationNumberAttr] = `${endLine}:${endColumn}`.toString();
+          additionJSON[endLocationNumberAttr] =
+            `${endLine}:${endColumn}`.toString();
         }
       }
 
@@ -125,8 +184,8 @@ class TagInjector {
 
       return result;
     } catch (error) {
-      console.error('error', error);
-      return '';
+      console.error("error", error);
+      return "";
     }
   }
 
@@ -140,11 +199,20 @@ class TagInjector {
         // 插值表达式 {{ msg }}
         return `{{${child.content.content}}}`;
       }
-      return '';
+      return "";
     });
 
-    return textParts.filter(Boolean).join(' ').trim();
+    return textParts.filter(Boolean).join(" ").trim();
   }
+
+  getVueAttr(props: any[], name: string) {
+    const p = props.find(
+      (item: any) => item.name === name || (item.type === 7 && item.arg?.content === name)
+    );
+    if (!p) return null;
+    // type 6 是普通属性，type 7 是指令(v-bind)
+    return p.type === 6 ? p.value?.content : p.exp?.content;
+  };
 
   // 注入所有子元素
   injectChildren(node: any, filename: string, parentHasVFor: boolean, s: any) {
